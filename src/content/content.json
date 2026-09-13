@@ -46,10 +46,7 @@
         "zh": "联系"
       },
       "email": "josephine.shen@proton.me",
-      "linkedin": {
-        "label": "LinkedIn",
-        "url": "https://linkedin.com/in/josephinesb"
-      }
+      "linkedin": "linkedin.com/in/josephinesb"
     },
     "place": {
       "en": "Berlin • 2026",

@@ -59,7 +59,7 @@ const ok=(n,v,extra='')=>{results.push(`${v?'PASS':'FAIL'}  ${n}${extra?'  '+ext
   await p.goto(URL,{waitUntil:'networkidle'}); await p.waitForTimeout(2200);
 
   const hits = await p.$$eval('#scroll .hit, #fixed .hit', els => els.map(e=>({tag:e.tagName,id:e.dataset.id,href:e.getAttribute('href'),pressed:e.getAttribute('aria-pressed'),label:e.textContent,w:e.offsetWidth,h:e.offsetHeight})));
-  ok('hit layer built', hits.length>=3, JSON.stringify(hits.map(h=>h.id)));
+  ok('hit layer built', hits.length>=1, JSON.stringify(hits.map(h=>h.id)));
   ok('all targets >= 44px tall', hits.every(h=>h.h>=44));
   /* These two used to assert the opposite - that mail and linkedin were real
      anchors carrying mailto: and https: - and that was the largest hole in the
@@ -76,7 +76,16 @@ const ok=(n,v,extra='')=>{results.push(`${v?'PASS':'FAIL'}  ${n}${extra?'  '+ext
     const found = ['mailto:','proton.me','linkedin.com','josephine'].filter(w=>dom.toLowerCase().includes(w));
     ok('the live DOM carries no address', found.length===0, found.join(' '));
   }
-  ok('both footer targets still act', hits.some(h=>h.id==='mail') && hits.some(h=>h.id==='linkedin'));
+  /* THE FOOT NO LONGER ACTS. The address and the LinkedIn URL were targets -
+     unlabelled buttons over drawn text, destination read from the scene at
+     click time - and they are now simply typeset. So what is asserted is the
+     absence: no target sits over either of them, and the language switch is
+     the only interactive surface on the page. A link slot on a written piece
+     will add one the day a url is supplied, which is why this tests for those
+     two ids rather than for a count. */
+  ok('the foot is set, not pressed',
+    !hits.some(h=>h.id==='mail') && !hits.some(h=>h.id==='linkedin'),
+    JSON.stringify(hits.map(h=>h.id)));
   /* ONE language control, not two. Two targets for a two-state switch asks the
      reader to aim; this asserts the aiming is gone. */
   ok('the language control is a single element',

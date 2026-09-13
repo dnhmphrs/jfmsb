@@ -1554,7 +1554,7 @@ function footer(scene, content, lang, g, y0) {
      address, then the link with the mark opposite it. */
   const m = cvMetrics(g);
   const mailRun = scene.prepare(c.contact.email, S.link);
-  const liRun = scene.prepare(c.contact.linkedin.label, S.link);
+  const liRun = scene.prepare(c.contact.linkedin, S.link);
 
   /* THE AVAILABILITY, WHERE THE PHONE PUTS IT.
 
@@ -1588,32 +1588,35 @@ function footer(scene, content, lang, g, y0) {
     top += (avLines.length - 1) * avLead + probe.descent + u * 4;
   }
   const y = top + mailRun.ascent;
-  /* Stacked, the two links were set 1.15 of a line apart - which is to within
-     half a pixel the distance a CV entry puts between its title and the
-     organisation under it. So the last line of the page read as one more
-     entry, and the two quietest words on it as a heading and its subtitle
-     rather than as two places to go.
+  /* Stacked, they sit 1.15 of a line apart, which is the interline the type
+     wants. It used to be six units - far wider - and that was never a
+     typographic decision: scene.hit gives every target a 44px box, so two
+     baselines 22px apart produced two boxes overlapping by half, and the later
+     sibling won the overlap - half of the address was pressable only as
+     LinkedIn. The gap was the TARGET's measure standing in for the type's.
 
-     It was also a real fault and not only a reading of one. Scene.hit gives
-     every target a 44px box - the floor a finger needs - so two baselines 22px
-     apart produced two boxes overlapping by 22px, with the later sibling
-     winning the overlap: half of the address was pressable only as LinkedIn.
-     The interline here is therefore the TARGET's measure and not the type's,
-     and u*6 is the smallest multiple of the page's own baseline unit that
-     clears it across the whole one-column band. */
-  const liY = m.hang ? y : Math.round(y + Math.max(u * 6, lead(S.link) * 1.15));
+     With nothing pressable here the constraint is gone and the two lines close
+     up into what they are: two addresses, one under the other. */
+  const liY = m.hang ? y : Math.round(y + lead(S.link) * 1.15);
   const liX = m.hang ? m.x0 : g.left;
   const seal = scene.seal('foot.links', y - mailRun.ascent, 0);
 
-  const mail = scene.place('foot.mail', mailRun, g.left, y, INK, { seal });
-  /* `go`, not `href`. The destination is handed to the interaction layer as a
-     property of the scene and never reaches an attribute: putting it in the
-     DOM would publish the address in readable text, which is the one thing
-     this page is built not to do. See sync() in main.js. */
-  scene.hit('mail', mail, g.left, y, { key: 'foot.mail', go: `mailto:${c.contact.email}` });
+  /* SET, NOT PRESSED.
 
+     Both of these were targets - an unlabelled button over the drawn address,
+     with the destination read from the scene at the moment of a click, which
+     is how this page has links without ever putting one in the DOM. They are
+     now simply typeset, and LinkedIn is its URL rather than its name, because
+     a name is a label for a link and a URL is an address.
+
+     What that costs is real and worth stating: nothing on this page is
+     selectable - it is a canvas - so an address that cannot be pressed cannot
+     be copied either, and a reader has to type it. What it buys is a page with
+     no interactive surface at all except the language switch: nothing to hover,
+     nothing to mis-tap, no cursor change, and a foot that reads as printed
+     matter rather than as a form. That is the trade, made deliberately. */
+  scene.place('foot.mail', mailRun, g.left, y, INK, { seal });
   scene.place('foot.linkedin', liRun, liX, liY, INK, { seal });
-  scene.hit('linkedin', liRun, liX, liY, { key: 'foot.linkedin', go: c.contact.linkedin.url, external: true });
 
   /* The end mark, and it is the GLYPH rather than a rectangle shaped like it.
 
