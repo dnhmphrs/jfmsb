@@ -1,5 +1,5 @@
 {
-  "_readme": "ALL text on the site lives here, in English (en) and Chinese (zh). Nothing is rendered from HTML - every string is drawn into a canvas by the GPU - so this file is the only place to edit wording, and it is the only readable copy that exists. The build XORs and base64s it into the bundle and prunes the keys below, so none of this ships as text. Keep both languages filled: the toggle is a cut between them and a missing value leaves a hole on screen. Do not rename keys. Plain text only - no HTML tags, no <br/>: line breaks are decided by the layout engine. Opening runs carry no terminal punctuation - a page that states does not narrate. An entry marked \"placeholder\": true is a real thing with a fact still missing; read its \"note\", fill the value in, then delete both keys. A blank \"year\" or \"url\" is drawn as the hollow square - the page shows where the fact will go rather than hiding that it is missing. _readme, note and placeholder are stripped at build and never leave the repository. After adding any NEW Chinese character, run `npm run fonts` - the CJK webfonts are subset to exactly the characters this file uses.",
+  "_readme": "ALL text on the site lives here, in English (en) and Chinese (zh). Nothing is rendered from HTML - every string is drawn into a canvas by the GPU - so this file is the only place to edit wording, and it is the only readable copy that exists. The build XORs and base64s it into the bundle and prunes the keys below, so none of this ships as text. Keep both languages filled: the toggle is a cut between them and a missing value leaves a hole on screen. Do not rename keys. Plain text only - no HTML tags, no <br/>: line breaks are decided by the layout engine. Opening runs carry no terminal punctuation - a page that states does not narrate. An entry marked \"placeholder\": true is a real thing with a fact still missing; read its \"note\", fill the value in, then delete both keys. A blank \"year\" or \"url\" is drawn as the hollow square, and an open-ended year simply ends on its en dash - the page shows where the fact will go rather than hiding that it is missing. _readme, note and placeholder are stripped at build and never leave the repository. After adding any NEW Chinese character, run `npm run fonts` - the CJK webfonts are subset to exactly the characters this file uses.",
   "labels": {
     "en": "EN",
     "zh": "中",
@@ -124,7 +124,7 @@
           },
           "entries": [
             {
-              "year": "2025–■",
+              "year": "2025–",
               "title": {
                 "en": "Fellow",
                 "zh": "研究员"
@@ -135,7 +135,7 @@
               }
             },
             {
-              "year": "2024–■",
+              "year": "2024–",
               "title": {
                 "en": "Labour movements and public-interest technology",
                 "zh": "劳工运动与公共利益技术"
@@ -154,7 +154,7 @@
           },
           "entries": [
             {
-              "year": "2023–■",
+              "year": "2023–",
               "title": {
                 "en": "Workshops and convenings",
                 "zh": "工作坊与召集"
@@ -165,7 +165,7 @@
               }
             },
             {
-              "year": "2023–■",
+              "year": "2023–",
               "title": {
                 "en": "Political organising",
                 "zh": "政治组织工作"
