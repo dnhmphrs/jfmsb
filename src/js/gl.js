@@ -511,11 +511,21 @@ export function drawScene(marks, scene, alpha = 1, hoverKey = null, reveal = nul
        under the toggle is nothing; a threshold rule dissolving while the word
        that names it stays put is a page coming apart. The frame of the
        document is always drawn - the same rule the seals follow. */
-    if (!it.fixed && it.kind === 'text' && scene.edge) {
-      /* In scope only if the mark reaches into the toggle's column. */
-      if (it.edge || it.x + it.run.width > scene.edge.x0) {
-        const bottom = it.y - fixedY + (it.run.inkDescent || 0);
-        a *= edgeFade(bottom, scene.edge, it.run.inkAscent || it.run.ascent || 0);
+    /* A rect may OPT IN, and one does: the written piece's link slot. Its box
+       is not part of the document's frame, it is a container whose whole
+       meaning is the word inside it - so with only the word fading, the thing
+       that travelled under the toggle was an empty outlined rectangle. That is
+       the same fault this rule was written to prevent, seen from the other
+       side, and the fix is the file's own principle: the unit of a fade is the
+       OBJECT. */
+    if (!it.fixed && scene.edge && (it.kind === 'text' || it.edge)) {
+      const isText = it.kind === 'text';
+      const w = isText ? it.run.width : it.w;
+      if (it.edge || it.x + w > scene.edge.x0) {
+        /* Text is placed on a baseline and a rect from its top edge. */
+        const bottom = it.y - fixedY + (isText ? (it.run.inkDescent || 0) : it.h);
+        const asc = isText ? (it.run.inkAscent || it.run.ascent || 0) : it.h;
+        a *= edgeFade(bottom, scene.edge, asc);
         if (a <= 0.002) continue;
       }
     }

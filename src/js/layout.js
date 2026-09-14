@@ -170,8 +170,10 @@ function scale(vw) {
   /* `zh` is the per-role correction for Chinese: a size factor, a floor in CSS
      px, and a weight step. See adapt(). */
   return {
-    name: { family: SANS, size: f(32, 54), lh: 1.05, weight: 500, tracking: f(-0.018, -0.028), zh: { k: 0.94, dw: -100, track: 0.02 } },
-    /* The name, now that it is a masthead slug rather than the display. The
+    /* The name. It was a display role - 32 to 54px, the largest thing on the
+       page - until the sentence took that job; the role stayed behind unused
+       for a while and is now gone, because a scale that declares a size
+       nothing sets is a scale nobody can trust. The
        widest tracking on the page by some way: at 15px a name has to read as a
        STANDING HEAD - the thing at the top of every page of a publication -
        and letting it out is what separates that from a small heading. It is
@@ -459,6 +461,7 @@ class Scene {
     this.items.push({
       kind: 'rect', key, x, y, w, h,
       color: color || RULE, alpha, stroke: opts.stroke || 0, fixed: !!opts.fixed,
+      edge: !!opts.edge,
     });
   }
 
@@ -564,7 +567,7 @@ function planToggle(scene, content, lang, g) {
   /* Lit and dim differ in weight as well as tone. Tone alone is not enough:
      the dim value still has to clear 4.5:1 like everything else, which leaves
      it close enough to the lit one to be ambiguous. */
-  const off = { ...S.nav, weight: 400 };
+  const off = { ...S.nav, weight: 500 };
 
   /* Both marks come from content.json rather than sitting here as literals:
      everything the encoder cannot see is a string that ships in plain sight. */
@@ -810,7 +813,7 @@ function head(scene, content, lang, g) {
         /* The same hairline the toggle is built from, drawn to the ink height
            of the capitals rather than to the leading. One device used twice is
            a page with a vocabulary; two devices are a page with a habit. */
-        scene.rect(`index.cred.${ri}.${kk}`, Math.round(x + sep), Math.round(by - barH), 1, barH, RULE, 0.3);
+        scene.rect(`index.cred.${ri}.${kk}`, Math.round(x + sep), Math.round(by - barH), 1, barH, RULE, HAIRLINE * 1.6);
         x += sep * 2 + 1;
       }
       scene.place(creds[i].key, runs[i], x, by, creds[i].color, { seal: credSeal });
@@ -1031,9 +1034,31 @@ function cvMetrics(g) {
    THE INDEX, at the section's own size and a gentler track. Tertiary ink: the
    rail is a texture the eye counts, not a thing it reads, and a number set as
    darkly as the title beside it would be a two-column table. */
-const sectionRole = (S, g) => (g.cols === 1
+/* TWO RANKS, NOT ONE.
+
+   These were the same function, and at one column that made the four band
+   names - ABOUT, WRITING, WORK, CONTACT - and the three section names inside
+   the CV the identical mark: 15.2px, weight 600, tracked +0.115, primary ink,
+   seven times down the page. A hierarchy with no step in it is not a
+   hierarchy, and on the phone it is most of why the lower half reads flat: a
+   reader gets no signal that NOW is inside WORK rather than beside it.
+
+   So the band name keeps the 1.45 it was given - it is the page's threshold
+   and it earns the size - and the section name takes a smaller step up, which
+   still lifts it clear of the entry titles under it without pretending to be
+   a band.
+
+   The Chinese correction now applies at EVERY width rather than only at one
+   column. 现在 has no capitals to be tracked and no case to distinguish it, so
+   size is the only instrument left holding it apart from the caption under it
+   - and at three columns it was setting 13.0px against a 12.0px org, which is
+   not a step, it is a rounding error. */
+const blockRole = (S, g) => (g.cols === 1
   ? { ...S.section, size: S.section.size * 1.45, tracking: 0.115, zh: { ...S.section.zh, k: 1.12 } }
-  : S.section);
+  : { ...S.section, zh: { ...S.section.zh, k: 1.12 } });
+const sectionRole = (S, g) => (g.cols === 1
+  ? { ...S.section, size: S.section.size * 1.16, tracking: 0.13, zh: { ...S.section.zh, k: 1.12 } }
+  : { ...S.section, zh: { ...S.section.zh, k: 1.12 } });
 
 /* The gap between a stacked section name and the first entry under it. In one
    place because measureSections reserves it and block() steps over it, and a
@@ -1147,7 +1172,7 @@ function threshold(scene, blk, lang, g, y, S, u) {
      upside down. What keeps the threshold distinct from the five names under
      it is not size - it is that its rule is interrupted and theirs are not,
      which is the only place on the page that happens. */
-  const label = scene.prepare(blk.label[lang], sectionRole(S, g));
+  const label = scene.prepare(blk.label[lang], blockRole(S, g));
   const lift = Math.round((label.inkAscent || label.capHeight) / 2);
   scene.place(`${blk.key}.label`, label, g.left, Math.round(y) + lift, INK);
   const ruleX = g.left + Math.round(label.width + Math.max(12, u * 1.4));
@@ -1269,8 +1294,20 @@ function block(scene, blk, lang, g, y0, measured, labels) {
          it keeps its measure. */
       const descW = m.hang ? Math.min(wide, 42 * S.prose.size) : wide;
       const proseRole = adapt(S.prose, lang);
-      const titleRole = adapt(S.title, lang);
-      const titleLead = Math.round(S.title.size * S.title.lh);
+      /* A STEP OVER THE ABSTRACT UNDER IT.
+
+         The piece title was S.title and the abstract S.prose - 18.15 against
+         16.72 at 1440, the same face at the same weight, one and a half pixels
+         apart. Rendered, the band read as one long paragraph with its first
+         line slightly darker, which is the whole of why this band felt flat
+         next to the CV. A title needs a step, and fifteen percent is the
+         smallest one that reads at these sizes.
+         It also puts the paper titles just above the CV's entry titles, which
+         is the right order: this band was promoted out of the record because
+         these are not rows. */
+      const pieceTitle = { ...S.title, size: S.title.size * 1.15 };
+      const titleRole = adapt(pieceTitle, lang);
+      const titleLead = Math.round(pieceTitle.size * pieceTitle.lh);
       const proseLead = Math.round(S.prose.size * S.prose.lh);
       const titleProbe = scene.engine.run({ ...titleRole, text: 'H' });
       const proseProbe = scene.engine.run({ ...proseRole, text: 'H' });
@@ -1282,10 +1319,10 @@ function block(scene, blk, lang, g, y0, measured, labels) {
       const slotPadY = Math.round(Math.max(6, u * 0.55));
       const slotGap = Math.round(Math.max(10, u));
 
-      y += u * 4.5;
+      y += u * (m.hang ? 4.5 : 5.5);
       blk.pieces.forEach((p, pi) => {
         const seal = scene.seal(`${k}.${pi}`, y, pi * 70);
-        if (pi) y += u * (m.hang ? 5 : 6.5);
+        if (pi) y += u * (m.hang ? 5 : 5.5);
 
         const typeRun = scene.prepare(p.type[lang], S.role);
         /* NO YEAR ON A PIECE OF WRITING.
@@ -1315,7 +1352,7 @@ function block(scene, blk, lang, g, y0, measured, labels) {
            line full and gets wrap(); a title wants lines that look like a set. */
         const titles = balance(scene.engine, p.title[lang], titleRole, wide);
         titles.forEach((t, i) => {
-          scene.text(`${k}.${pi}.title.${i}`, t, S.title, px, ty + i * titleLead, INK, { seal });
+          scene.text(`${k}.${pi}.title.${i}`, t, pieceTitle, px, ty + i * titleLead, INK, { seal });
         });
         y = ty + (titles.length - 1) * titleLead;
 
@@ -1363,16 +1400,16 @@ function block(scene, blk, lang, g, y0, measured, labels) {
         }
         const slotBase = slotTop + slotPadY + slotInk;
         scene.rect(`${k}.${pi}.slot`, slotX, slotTop, slotW, slotH,
-          has ? INK : RULE, has ? 1 : HAIRLINE * 1.6, { stroke: has ? 0 : 1 });
+          has ? INK : RULE, has ? 1 : HAIRLINE * 1.6, { stroke: has ? 0 : 1, edge: true });
         /* Unsealed, like the rules and the box it sits in. A seal is a group,
            and this object's group is the RECTANGLE - which is a rect and cannot
            carry one - so sealing only the word inside it showed an empty
            outlined box for the length of the reveal. */
         scene.place(`${k}.${pi}.slot.label`, slotRun, slotX + slotPadX, slotBase,
-          has ? PAPER : INK_3);
+          has ? PAPER : INK_3, { edge: true });
         scene.rect(`${k}.${pi}.slot.mark`,
           Math.round(slotX + slotW - slotPadX - mark), Math.round(slotBase - mark), mark, mark,
-          has ? PAPER : INK_3, has ? 1 : HAIRLINE * 4, { stroke: has ? 0 : 1 });
+          has ? PAPER : INK_3, 1, { stroke: has ? 0 : 1, edge: true });
         if (has) {
           scene.hit(`${k}.${pi}.read`, { width: slotW, lineHeight: slotH, ascent: slotBase - slotTop },
             slotX, slotBase, { key: `${k}.${pi}.slot`, go: p.url, external: true });
@@ -1500,7 +1537,7 @@ function block(scene, blk, lang, g, y0, measured, labels) {
           const mark = Math.max(6, Math.round(S.year.size * 0.62));
           scene.rect(`${k}.${si}.${ei}.year.mark`,
             Math.round(x + m.trackW - mark), Math.round(ey - mark), mark, mark,
-            INK_3, HAIRLINE * 4, { stroke: 1 });
+            INK_3, 1, { stroke: 1 });
         }
       }
     });
@@ -1554,7 +1591,7 @@ function footer(scene, content, lang, g, y0) {
      address, then the link with the mark opposite it. */
   const m = cvMetrics(g);
   const mailRun = scene.prepare(c.contact.email, S.link);
-  const liRun = scene.prepare(c.contact.linkedin.label, S.link);
+  const liRun = scene.prepare(c.contact.linkedin, S.link);
 
   /* THE AVAILABILITY, WHERE THE PHONE PUTS IT.
 
@@ -1572,7 +1609,7 @@ function footer(scene, content, lang, g, y0) {
      now. Set at a 1.75 leading rather than the dateline's 1.2 - two rows of
      capitals set solid weld into a grey block, and this is the one place they
      are read as a sentence rather than scanned as a label. */
-  let top = y0 + u * 3.2;
+  let top = y0 + u * (m.hang ? 4.5 : 5.5);
   if (g.cols === 1) {
     const avRole = adapt(S.role, lang);
     const avText = S.role.upper ? c.available[lang].toUpperCase() : c.available[lang];
@@ -1588,32 +1625,35 @@ function footer(scene, content, lang, g, y0) {
     top += (avLines.length - 1) * avLead + probe.descent + u * 4;
   }
   const y = top + mailRun.ascent;
-  /* Stacked, the two links were set 1.15 of a line apart - which is to within
-     half a pixel the distance a CV entry puts between its title and the
-     organisation under it. So the last line of the page read as one more
-     entry, and the two quietest words on it as a heading and its subtitle
-     rather than as two places to go.
+  /* Stacked, they sit 1.15 of a line apart, which is the interline the type
+     wants. It used to be six units - far wider - and that was never a
+     typographic decision: scene.hit gives every target a 44px box, so two
+     baselines 22px apart produced two boxes overlapping by half, and the later
+     sibling won the overlap - half of the address was pressable only as
+     LinkedIn. The gap was the TARGET's measure standing in for the type's.
 
-     It was also a real fault and not only a reading of one. Scene.hit gives
-     every target a 44px box - the floor a finger needs - so two baselines 22px
-     apart produced two boxes overlapping by 22px, with the later sibling
-     winning the overlap: half of the address was pressable only as LinkedIn.
-     The interline here is therefore the TARGET's measure and not the type's,
-     and u*6 is the smallest multiple of the page's own baseline unit that
-     clears it across the whole one-column band. */
-  const liY = m.hang ? y : Math.round(y + Math.max(u * 6, lead(S.link) * 1.15));
+     With nothing pressable here the constraint is gone and the two lines close
+     up into what they are: two addresses, one under the other. */
+  const liY = m.hang ? y : Math.round(y + lead(S.link) * 1.15);
   const liX = m.hang ? m.x0 : g.left;
   const seal = scene.seal('foot.links', y - mailRun.ascent, 0);
 
-  const mail = scene.place('foot.mail', mailRun, g.left, y, INK, { seal });
-  /* `go`, not `href`. The destination is handed to the interaction layer as a
-     property of the scene and never reaches an attribute: putting it in the
-     DOM would publish the address in readable text, which is the one thing
-     this page is built not to do. See sync() in main.js. */
-  scene.hit('mail', mail, g.left, y, { key: 'foot.mail', go: `mailto:${c.contact.email}` });
+  /* SET, NOT PRESSED.
 
+     Both of these were targets - an unlabelled button over the drawn address,
+     with the destination read from the scene at the moment of a click, which
+     is how this page has links without ever putting one in the DOM. They are
+     now simply typeset, and LinkedIn is its URL rather than its name, because
+     a name is a label for a link and a URL is an address.
+
+     What that costs is real and worth stating: nothing on this page is
+     selectable - it is a canvas - so an address that cannot be pressed cannot
+     be copied either, and a reader has to type it. What it buys is a page with
+     no interactive surface at all except the language switch: nothing to hover,
+     nothing to mis-tap, no cursor change, and a foot that reads as printed
+     matter rather than as a form. That is the trade, made deliberately. */
+  scene.place('foot.mail', mailRun, g.left, y, INK, { seal });
   scene.place('foot.linkedin', liRun, liX, liY, INK, { seal });
-  scene.hit('linkedin', liRun, liX, liY, { key: 'foot.linkedin', go: c.contact.linkedin.url, external: true });
 
   /* The end mark, and it is the GLYPH rather than a rectangle shaped like it.
 
@@ -1699,7 +1739,7 @@ export function buildScene(engine, content, vw, vh, lang = 'en', safeTop = 0, sa
      seven-pixel words. Twelve keeps it comfortably the deepest interval on
      the page - which is the property that makes it read as a division rather
      than as leftover paper - without spending a screen on it. */
-  let y = Math.round(headEnd + g.u * 12);
+  let y = Math.round(headEnd + g.u * (g.cols === 1 ? 12 : 17));
 
   /* Nothing goes in the void, and that is the decision rather than the
      absence of one. A mark was tried here and taken out: the square already
@@ -1716,10 +1756,10 @@ export function buildScene(engine, content, vw, vh, lang = 'en', safeTop = 0, sa
   });
   const cvEnd = y;
 
-  const footEnd = footer(scene, content, lang, g, cvEnd + g.u * 2);
+  const footEnd = footer(scene, content, lang, g, cvEnd + g.u * (g.cols === 1 ? 7 : 4));
   /* The tail. Deeper below three columns, where the footer is two lines
      rather than one and needs a closing gesture in proportion to it. */
-  scene.height = Math.round(footEnd + Math.max(g.margin, g.u * (g.cols < 3 ? 8 : 5)));
+  scene.height = Math.round(footEnd + Math.max(g.margin, g.u * (g.cols < 3 ? 6 : 5)));
   return { scene, grid: g };
 }
 
