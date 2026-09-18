@@ -432,8 +432,28 @@ const ok=(n,v,extra='')=>{results.push(`${v?'PASS':'FAIL'}  ${n}${extra?'  '+ext
   ok('X-Robots-Tag covers every response',
     vercel.headers.some((h) => h.source === '/(.*)'
       && h.headers.some((x) => x.key === 'X-Robots-Tag' && /noindex/.test(x.value))));
-  ok('there is no robots.txt to block the crawl that reads it',
-    !fs.existsSync(path.join(ROOT, 'robots.txt')));
+  /* There IS a robots.txt now, and what matters is what it does NOT say.
+
+     The header above is what actually keeps a bare URL out of a result page,
+     and a crawler has to fetch the page to read it - so a blanket Disallow
+     would be self-defeating: uncrawled is not unlisted, and a URL nobody may
+     fetch can still be listed from a link elsewhere, with nothing to suppress
+     it. The file therefore disallows the model-training and scraper agents,
+     which take robots.txt as the opt-out and ignore noindex entirely, and
+     leaves everything else free to fetch and be told noindex.
+
+     Asserted here because it is exactly the kind of file a later hand
+     "tightens" into User-agent: * / Disallow: /, which would quietly undo the
+     header. */
+  const robots = fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8');
+  const groups = robots.split(/\n\s*\n/);
+  ok('robots.txt is served', robots.length > 0);
+  ok('it opts out of model training',
+    ['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot', 'PerplexityBot', 'Bytespider']
+      .every((b) => new RegExp(`^User-agent: ${b}$`, 'mi').test(robots)));
+  ok('and it does NOT disallow the crawlers that read the noindex',
+    !groups.some((g) => /^User-agent:\s*\*$/mi.test(g) && /^Disallow:\s*\/\s*$/mi.test(g)),
+    (groups.find((g) => /^User-agent:\s*\*$/mi.test(g)) || '').trim().replace(/\n/g, ' | '));
 }
 
 server.close();
