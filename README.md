@@ -1,427 +1,67 @@
 # fmsb
 
-One page — an opening, a severely compressed CV, a footer — rendered entirely
-in WebGL. The ground, the rules and every glyph are drawn by the GPU.
+A one-page personal site, rendered entirely in WebGL. The ground, the rules and
+every glyph are drawn by the GPU from `src/content/content.json`.
 
-**Nothing readable ships.** Not a word in the title, not a meta description,
-not an accessible mirror, not a string literal in the bundle. That is deliberate: the
-owner wants the page to exist and not to be searchable. What it costs is set
-out in [Zero text](#zero-text), and the cost is not small.
-
-## Stack
-
-Plain HTML, a very small stylesheet, and five vanilla ES modules bundled by
-Rollup. No framework, no Three.js, no runtime dependencies at all. Fonts are
-self-hosted and subset. All visible text lives in `src/content/content.json`.
+**Nothing readable ships** — not in the HTML, not in the title, not as a string
+literal in the bundle. The page is meant to exist without being searchable.
+That constraint is why the site is built this way, and `npm run check` is what
+enforces it.
 
 ```bash
 npm install
-npm run dev      # live server + reload at http://localhost:5173
+npm run dev      # watch + serve at http://localhost:5173
 npm run build    # production build into dist/
-npm run preview  # serve the built dist/
-npm run fonts    # re-fetch and re-subset the webfonts (see below)
+npm run check    # drive the built site in a real browser — the gate before pushing
+npm run fonts    # re-subset the webfonts (see below)
 npm run lint
-npm run check    # drive the built site in a real browser (see below)
 ```
 
-A boot failure is logged to the console before `fallback()` degrades the page
-to bare ground. The degraded path is correct for a device that cannot run this
-and wrong to take silently for a bug, and the two look identical from outside.
-Keep her name out of any such string: `npm run check` greps the bundle for
-content words, and a log prefix is text like any other.
+`check` needs Playwright, which is deliberately not a dependency because it
+pulls a browser: `npm i -D playwright && npx playwright install chromium`. Set
+`CHROMIUM_PATH` if the machine already has one.
 
-`npm run check` also asserts what is NOT in the head: no `og:title`, no
-`og:description`, no `twitter:title`, no `twitter:description`. The share card
-is an image and nothing else, and that absence is the assertion.
+## Editing the content
 
-`check` needs Playwright, which is deliberately not a dependency — it pulls a
-browser and this runs rarely (`npm i -D playwright && npx playwright install
-chromium`). Set `CHROMIUM_PATH` if the machine has a browser already and cannot
-download another.
+Everything you can read on the site lives in `src/content/content.json`, and
+that file is the only place to change it.
 
-**`npm run check` is the important one.** Everything visible here is inside a
-canvas, so the usual safety nets do not apply: a unit test cannot see a glyph,
-and a type error is not the failure mode to worry about. It drives the real
-built site in a real browser and asserts on what it does — that the hit layer
-is made of real anchors and buttons and carries no readable text, that tab
-order is reading order, that the language control is a single element, that the
-switch lands on the very next frame and is finished there, that the opening is
-shallow and the CV is already on the first screen, that nothing overflows the
-measure, that no content word survives into the served HTML or the bundle, that
-`noindex` is present and `robots.txt` is not, that the tab mark is block
-glyphs end to end, that the language control is sticky and its target moves
-with it, that the page ships with nothing redacted and that `?reveal=on` still
-works — and that it still fails quietly
-with WebGL removed, with
-`localStorage` throwing, without `Intl.Segmenter`, under
-`prefers-reduced-motion`, at 320x480, and through a resize storm.
+**Every value has an `en` and a `zh` — keep both filled.** The language toggle
+is a straight cut between them, so a missing value leaves a hole on screen.
+Plain text only: no HTML, no `<br/>`. The layout engine decides line breaks.
 
-Deploys on Vercel as a static build (`outputDirectory: dist`).
+The file has three parts:
 
-## How it works
+- **`labels`** — the two words in the language toggle, and the marks.
+- **`index`** — the masthead and the foot: name, role, the `statement` set large
+  at the top, `context` (the short facts beside the role — two or three words
+  each, they share a line), `available`, `contact`, `place`.
+- **`blocks`** — the body, in the order it appears:
+  - `practice` → **About**, a `prose` array of paragraphs.
+  - `writing` → **Writing**, a `pieces` array of `{ type, title, description,
+    url }`. Give a piece its `url` and its slot becomes a `Read` button;
+    leave it empty and the slot stays outlined.
+  - `cv` → **Work**, a `sections` array of `{ section, entries }`, entries being
+    `{ year, title, org }`.
 
-```
-src/
-  index.html            the shell: a canvas, a scroll proxy, a fixed layer,
-                        two hidden viewport probes
-  content/content.json  ALL text, EN + ZH - edit here
-  js/
-    text.js             glyph atlas
-    gl.js               the renderer
-    layout.js           the box model
-    main.js             state, the DOM layers
-  styles/main.css       ~190 lines, and none of them style any text
-public/fonts/           subset woff2 + the generated @font-face rules
-```
+Three marks, one meaning each: **`■`** closes the document, **`□`** means a fact
+is expected and has not arrived yet, and a year that is still running just ends
+on its dash — `2025–`.
 
-**text.js — the glyph atlas.** Nothing here is DOM text, so type has to become
-pixels somewhere. Rather than ship a font parser, each text *run* — a whole
-string, at its final device-pixel size — is drawn once into a 2D canvas, which
-gets real shaping, real kerning, real CJK and real italics for free. The runs
-are shelf-packed into a single atlas canvas and uploaded as one texture, then
-cut into per-glyph vertical slices so the renderer can move letters
-independently. Font sizes are rounded to whole device pixels and run origins
-snap to the pixel grid, so at rest every texel lands on exactly one screen
-pixel and the type is as sharp as the DOM's.
-
-Only the language on screen is in the atlas. The atlas grows in height before
-it grows in width, because a shelf packer is bounded by the widest run it has
-to hold: 2048x4096 is the same capacity as a 4096 square for half the memory.
-
-**gl.js — the renderer.** Two passes. A full-screen triangle runs the ground
-shader; then one dynamic vertex buffer holds every glyph and every hairline and
-goes out in a single draw call. The atlas reserves an opaque white texel, which
-is how a rule and a letter can share one texture. WebGL 1 and GLSL ES 1.00
-throughout.
-
-**layout.js — the box model.** With no DOM there is no box model, so this file
-is it: `content.json` becomes a flat list of positioned runs and rectangles in
-CSS pixels, plus the regions that respond to a pointer. One page, in three
-parts — an opening held to the first screen, the CV under it, a footer at the
-end — and one scene, in one language.
-
-Nothing is set above 54px and nothing is heavier than 500. The whole scale
-spans about five to one, where a display page would span fifteen; hierarchy is
-carried by the space around a thing and by which of the two faces it is set in,
-which is a quieter instrument than size and a more exact one.
-
-**Pressing 中 is a cut.** The layout runs again, the atlas is rebuilt, and the
-other language is on screen the next frame — the same work a resize already
-does, inside the click. Nothing eases, nothing crossfades, and `npm run check`
-asserts that what is on screen one frame after the click is what is there when
-it settles, quad for quad.
-
-**The redaction ships OFF.** The machinery is complete and audited, and it is
-one query parameter away, but the resting page is a document rather than a
-document being declassified. With it on, a run that is partway open is drawn as
-one partial-UV quad for the revealed part plus a rectangle for the rest, so a
-seal is a single pass and never two copies of the same line. Seals are declared
-in `layout.js` — three across the head, one per CV section head, one per entry,
-one for the footer — and open on a cubic ease over 620ms, staggered by column.
-
-`REVEAL` at the top of `main.js` is the whole control surface, and every field
-is reachable from the URL:
-
-| | | |
-|---|---|---|
-| — | default | nothing is ever barred |
-| `?reveal=on` | | seals arrive barred and open; a seal re-closes well outside the window, so every arrival is a reveal |
-| `?reveal=once` | | as above, but each seal opens once and stays open |
-| `?reveal=off` | | back to the default |
-| `?load=0` / `?load=1` | | whether the *first screen* arrives sealed and opens, or begins finished |
-
-A seal only ever closes far outside the window, so there is no scroll position
-at which something visible stays hidden — and `prefers-reduced-motion` opens
-everything on the first layout and never moves again.
-
-**The toggle's column.** The language toggle is fixed to the viewport, which
-means the document slides underneath it. Only what actually passes *beneath the
-control* is faded — a mark is in scope when its right edge reaches into
-`scene.edge.x0`, the toggle's own left edge less half a gutter — so the name,
-the dateline, the sentence and every left-hand column scroll untouched.
-
-Two details make it a fade rather than a disappearance. The ramp is measured on
-the mark's **ink bottom**, not its baseline: measured on the baseline a tall
-line goes out while its capitals are still well below the edge. And the ramp is
-as long as the mark is tall plus the band, so a heading crosses at the same
-apparent speed as a caption. `full` is the availability line's own ink, which is
-the topmost thing in that column at rest, so there is no step the moment
-scrolling starts. What passes directly under the toggle lands around a quarter
-alpha — a ghost the control reads cleanly over, not a hole cut in the page.
-
-**The ground.** A port of the washi ground from the archived builds
-(`_archive/rebuilds/file2.html`), not of the silk shader beside it. The silk is
-the interesting one to write and the wrong one for this page. What the archive
-actually did was two lines of CSS:
-
-```css
-radial-gradient(120% 80% at  50% -10%, rgba(143,95,160,.045), transparent 60%)
-radial-gradient(100% 60% at 100% 110%, rgba(143,95,160,.035), transparent 55%)
-```
-
-Two enormous, very soft, off-centre pools over a warm broadsheet white, with a
-faint grain on top. That is a better gesture than the brushed wash it replaces,
-which had a defined upper edge and was therefore a *thing on* the page rather
-than a property *of* it.
-
-What it is *arranged* as is a landscape. A sansui hand grades ink down from the
-top edge, leaves the middle of the sheet bare — that bare band is the mist, and
-it is the subject — and puts a second, lighter density along the bottom. So:
-**sky** over the head of the document, **ground** under its foot, and a middle
-the wash never touches. Both centres sit outside the sheet, so what is on the
-page is only ever the outer, near-flat part of each and neither has a visible
-middle to find.
-
-The coordinate is the **document**, not the window. A fragment's distance from
-the top of the page is the scroll plus its own offset in the viewport, scaled by
-`uDoc` to the page's own length, so the wash is one gradient across the whole
-document revealed by scrolling rather than moved by it — and a wash pinned to
-the window is a vignette, which announces itself the instant the document slides
-under it. Depth is capped by the ink: `#5B584C` measures 4.77:1 against the
-darkest point the shader can reach, and the page spans about eighteen percent of
-luminance end to end.
-
-The pools are lilac, from the archive and ultimately from the WebGPU silk, and
-they are the only hue anywhere. A neutral pool of the same depth reads as a
-smudge; a violet one reads as light, because a warm ground with a cool shadow
-is how a surface under a real sky behaves. And the dither is the most important
-term in the file — the whole ramp is a couple of dozen of the 256 available
-levels, which bands into visible contours without it.
-
-
-## Zero text
-
-The canvas is a picture of text, and a picture of text is not text — which is
-the point. A search index reads the DOM; it does not screenshot a page and OCR
-it. So drawing every string into a canvas is the one mechanism here that is
-*enforced* rather than requested. It is also undone completely by a single
-`<title>`, which is where her name lived until this pass.
-
-The tab is the one surface the page cannot draw, and an empty `<title>` just
-hands it the hostname — nameless, but characterless, and indistinguishable from
-a parked domain. So the title is a **mark, not a name** — block glyphs, no word
-in any language for an index to lift. It is `TITLE_MARK` in
-`rollup.config.mjs`, written literally (`■■`) and injected into both
-`index.html` and `404.html` at build; the tag is left empty in `src/` so the
-source shows what the page itself contributes, which is nothing.
-
-Setting `TITLE_MARK` to `''` falls through to a **derived** mark instead: a
-sixteen-glyph alphabet indexed by hex digit, each glyph the 2×2 bitmap of the
-digit it stands for, run over the first 32 digits of a SHA-256 of the content —
-so the tab is the hash drawn as a two-row strip, changing exactly when the CV
-does. Worth knowing why that alphabet surprises people: `NIBBLES` is a **lookup
-table, not the tab text**. Putting the same glyph at slots 0 and 1 does not
-produce two of it; it produces one for every `0` or `1` digit the hash happens
-to contain, wherever they fall. A table shorter than sixteen entries returns
-`undefined` for the rest — which is why it seems to need padding with spaces.
-The spaces are index padding, not spacing. It now throws instead.
-
-What was removed, in order of how much each was leaking:
-
-| | was |
-|---|---|
-| `#a11y` | the entire CV as real HTML, inlined into `index.html` at build |
-| `<title>`, description, author | her name and a one-line biography (the title is now a block-glyph mark) |
-| Open Graph + Twitter tags | eleven tags of pure crawler food, and `og.jpg`. Four came back, and only four: `og:image`, its type, `twitter:card` and `twitter:image`, all pointing at `public/square.png`. A link pasted into a message unfurls as the mark and no words. `og:title` and `og:description` are the two that would put her name back in the served HTML, so `npm run check` asserts they stay absent. |
-| the bundle | `content.json` inlined verbatim by `@rollup/plugin-json` |
-| the hit layer | an off-screen `<span>` per control carrying its label |
-| `<noscript>` | thirty-one words explaining the mechanism |
-| HTML comments | 36% of the served bytes, all of it readable English |
-| `404.html` | a full error page set in both faces |
-
-`content.json` now ships pruned, XOR-ed and base64-ed by a Rollup `load` plugin
-— `@rollup/plugin-json` is deleted, and *that deletion* is what makes the
-guarantee. Call the encoding what it is: obfuscation. The key sits one line
-above the payload. It defeats `grep`, a text-extracting crawler and a
-view-source, and it defeats nothing else. The prune also drops `_readme`,
-`note` and `placeholder`, which are the owner's private marks recording which
-CV facts are still unverified.
-
-The other half is **`noindex`, and deliberately no `robots.txt`.** Those two
-are mutually exclusive and the wrong one is the popular one: `Disallow`
-controls *crawling*, not indexing, so a crawler told not to fetch the page
-never reads the `noindex` — and a URL linked from anywhere can still be listed,
-bare, as "No information is available for this page". Blocking the crawl makes
-a listing more likely, not less. So the crawl is allowed and the answer is
-given: a `robots` meta in the served head, and an `X-Robots-Tag` header on
-`/(.*)` in `vercel.json` for everything a meta tag cannot reach — the bundle,
-the fonts, the licence file.
-
-**What this costs, plainly.** A screen reader now lands on a document that
-announces nothing: the canvas is `aria-hidden` and there is no other text. A
-visitor without JavaScript, or with a GPU that refuses WebGL, gets bare ground
-and no contact details. Printing produces a blank sheet. Find-in-page,
-translation and Reader Mode return nothing. The three controls have no
-accessible names. Link previews are bare URL chips, and the browser tab shows
-a strip of block glyphs rather than a name. None of that is a bug; all of it is
-the decision, and reverting the commit that made it puts every piece back.
-
-Two things it does **not** buy, and should not be described as buying.
-Unsearchable is not private — the hostname carries her name, and if the GitHub
-repository is public then `content.json` is readable there in full. And nothing
-here stops a human, a screenshot-and-OCR scraper, or a crawler with a vision
-model; only authentication would.
-
-What survives, and why: `#scroll` still carries a transparent `<a>` or
-`<button>` over every interactive mark, in content coordinates — and `#fixed`
-carries the same for the one control that is viewport-anchored, so that
-position:fixed does the tracking and no scroll arithmetic enters the
-interaction path. Tab order,
-Enter, the pointer cursor, touch slop, `mailto:` context menus and cmd-click
-are the browser's job rather than ours. Their `href`s are assigned at runtime
-from the decoded content, so they are absent from the served bytes. And
-**visible text cannot be selected**; it never could.
-
-## Editing content
-
-Open `src/content/content.json`. Every value has an `en` and a `zh` — keep both
-filled, because the toggle cuts from one to the other and a missing value
-leaves a hole on screen. Plain text only: no HTML, no `<br/>`. The layout engine
-decides line breaks.
-
-- `index` — the name, the role, the sentence, `context` (the facts set inline
-  beside the role — keep them to two or three words each, they share a line),
-  `available` (label and value, which live in the footer), the contact block.
-- `labels` — the CV heading and the two words in the language toggle. They live
-  here rather than in `layout.js` because anything the encoder cannot see is a
-  string that ships in plain sight.
-- `blocks` — the body of the page, in order. Each block is `{ key, label,
-  sections }`: `label` is the word that interrupts its threshold rule, `key`
-  prefixes every scene key it draws, and `sections` are `{ section, entries }`
-  with entries of `{ year, title, org }`. One line each.
-
-  There is one — **CV** — holding Now, Research, Writing, Convening and
-  Background. The array exists because the page briefly had three (an approach
-  diagram and a research block above the record) and because a second body of
-  material is a plausible thing to want; a block with an empty `sections` array
-  still draws its threshold and reserves a band, which makes one usable as a
-  placeholder. Until then the shape of the page is deliberately just two
-  things: who she is, and what she has done.
-- An entry marked `"placeholder": true` is a real thing with a fact still
-  missing; read its `note`, fill the value in, delete both keys.
+An entry marked `"placeholder": true` is a real thing with a fact still missing.
+Read its `note`, fill the value in, then delete both keys. `_readme`, `note` and
+`placeholder` are stripped at build and never leave the repository.
 
 **After adding a Chinese character that was not already on the site, run
 `npm run fonts`.** The CJK faces are subset to exactly the characters this file
-uses — 239 of them, which is how several megabytes of Noto becomes 56kB and
-74kB — so a new character is a missing glyph until they are regenerated.
-English edits never need it; the Latin faces carry full `latin` + `latin-ext`.
+uses — 292 of them, which is how several megabytes of Noto becomes about 70kB
+each — so a new character is a missing glyph until they are regenerated. English
+edits never need it; the Latin faces carry full `latin` + `latin-ext`.
 
-`npm run fonts` also regenerates `public/fonts/OFL.txt` from the same tables
-that produce `fonts.css`. A hand-maintained licence file drifts, and OFL 1.1
-requires each font's copyright notice to travel with the font — so a list that
-credits a face the directory no longer holds is not a stale formality, it is
-the condition of redistribution unmet.
+## The rest
 
-## Typography
+The source carries its own reasoning. `src/js/layout.js` is the box model and
+holds every visual decision; `scripts/check.mjs` lists what is actually
+guaranteed. `CLAUDE.md` has the working rules for changing any of it.
 
-Hanken Grotesk over Newsreader, divided by job rather than by hierarchy: the
-grotesque is the structure — the name, the toggle, the section heads, every
-tracked capital — and the serif is the voice, the places where a sentence is
-being spoken rather than a page labelled. Nothing is set in both.
-
-Hanken Grotesk is the Swiss one without being a Helvetica tracing: horizontal
-terminals and a rational frame, but slightly open apertures and a generous
-x-height. That is what earns it the job here — a face has to hold a name at
-52px *and* a capital tracked to +0.15em at 10px, and the ones that manage the
-first usually shut down at the second. Newsreader is a newspaper serif in its
-bones and a contemporary drawing on its surface.
-
-Nothing is heavier than 600 and nothing is larger than 54px. A grotesque with
-presence at 500 lets the page stay quiet and still sound certain; the face this
-replaces needed weight to do the same work, and weight is what made an earlier
-pass read as shouting.
-
-Noto Sans SC and Noto Serif SC are the Chinese companions: 黑体 under the
-grotesque, 宋体 under the serif. Every string on this site exists twice, so the
-Latin is never seen alone.
-
-Neither Latin face ships more of an axis than it uses. `ctx.font` is the CSS
-font shorthand and carries no `font-variation-settings`, so an axis is
-unreachable from Canvas2D through a family name alone; Google is asked for it
-frozen at one value instead — `opsz,wght@20,300..700` — which returns a partial
-instance with that axis fixed and the weight still variable, at a third the
-size of the two-axis original. An optical size is chosen by naming a family.
-
-All four faces are self-hosted (`scripts/fetch-fonts.mjs`, SIL OFL, see
-`public/fonts/OFL.txt`). No request leaves the visitor's browser for a third
-party — which for a Berlin-based researcher is a legal position as much as a
-technical one, after LG München I 3 O 17493/20.
-
-## Layout
-
-| viewport | columns | margin | track |
-|---|---|---|---|
-| 390 | 1 | 24 | 332 |
-| 744 | 2 | 28 | 333 |
-| 1280 | 3 | 49 | 380 |
-| 1440 | 3 | 55 | 416 |
-| 1920 | 4 | 73 | 402 |
-| 2560 | 5 | 96 | 427 |
-| 3440 | 6 | 96 | 500 |
-
-Margin is `clamp(vw × 0.038, 24, 96)`; content is the viewport less two of
-them, always.
-
-There is no maximum width and nothing is centred in a field of empty gutter.
-The previous rule capped the content at 1440 and then centred it, which on a
-2560 display left 560px of nothing on each side: neither hugging the edges, so
-the page had no frame, nor deliberately centred, because the margins were set
-by a cap rather than by proportion. Hugging the edges is a decision; a cap is
-an accident.
-
-What a cap was protecting is the LINE MEASURE, and columns protect it better —
-so the column count keeps rising with the viewport, six of them past 2700, and
-every track stays inside about 27em whatever the display does.
-
-The head is three things and then nothing: the name at the top of the frame
-with the language toggle on its baseline; one credential line under it, set as
-a dateline — role, city, languages, separated by hairlines rather than
-labelled; and one sentence at a 22em measure, break-balanced so it sets as a
-block rather than as a long line and a stub. Then the largest interval on the
-page, and the CV. That empty band is where the empty page becomes a decision
-rather than what was left over.
-
-The facts used to be a four-column spec sheet — BASED, LANGUAGES, CURRENTLY,
-AVAILABLE FOR — ruled across the measure. That is the format of an application,
-whatever it says; a page by someone who already holds the position does not
-list its particulars for assessment. Two of the four were load-bearing and are
-now inline beside the role, unlabelled. CURRENTLY was already the first entry
-of the CV, with a year attached. AVAILABLE FOR moved to the footer, next to the
-address: the head states who she is and the foot states how to reach her.
-
-The CV opens on a threshold rather than on a gap — a hairline with the word
-`CV` set on it, the rule starting after the word. It is the only interrupted
-rule on the site, which is what makes it read as a division and not as the
-first of five identical band rules.
-
-A CV section is a band: a hairline across the measure, its name hanging in the
-first column, and its entries filling the columns to the right. The first
-column stays empty for the whole height of the section, which is the point — it
-is the vertical the eye tracks down. Below three columns there is no column to
-hang in, so the name goes above its entries and they take the full measure.
-
-## Notes
-
-- Language choice persists in `localStorage`.
-- `prefers-reduced-motion` freezes the ground and opens every seal on the first
-  layout. Nothing on the page moves after that.
-- The language toggle is fixed to the viewport, at the alignment it has when the
-  page is at the top. Its hit region lives in `#fixed`, outside the scroll
-  proxy.
-- If the atlas will not fit in the GPU's largest texture, the page re-lays out
-  at DPR 1 rather than splitting into several draw calls.
-- A lost WebGL context is caught, cancelled (so the browser will offer it back)
-  and rebuilt; if it does not return within five seconds the page falls through
-  and cleared. The first paint waits on the webfonts, but only for 1.5s — a
-  canvas has no fallback face to paint in the meantime.
-- Text is rasterised at up to 2x device pixels. On a 3x phone the type is
-  therefore upscaled by half; raising the cap is a one-line change in
-  `main.js`, at the cost of a much larger atlas.
-- Printing produces a blank sheet, like every other path that is not the
-  canvas. See [Zero text](#zero-text).
-- Three CV entries still carry `"placeholder": true` — both papers and the NPT
-  Conference need real years. `placeholder` is pruned at build, so they ship
-  without one rather than with a wrong one.
-- `_archive/webgpu/` holds the previous WebGPU background — the silk shader
-  whose vocabulary (washi, gofun white, ink in damp paper) the current ground
-  descends from. Nothing there is bundled.
+Deploys on Vercel as a static build (`outputDirectory: dist`).
