@@ -1,4 +1,4 @@
-# fmsb
+# jfmsb
 
 A one-page personal site, rendered entirely in WebGL. The ground, the rules and
 every glyph are drawn by the GPU from `src/content/content.json`.
