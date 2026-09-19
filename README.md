@@ -3,10 +3,10 @@
 A one-page personal site, rendered entirely in WebGL. The ground, the rules and
 every glyph are drawn by the GPU from `src/content/content.json`.
 
-**Nothing readable ships** — not in the HTML, not in the title, not as a string
-literal in the bundle. The page is meant to exist without being searchable.
-That constraint is why the site is built this way, and `npm run check` is what
-enforces it.
+**No readable personal content ships** — not in the HTML and not as a string
+literal in the bundle. The generic tab title `Welcome` is the sole readable
+exception. The page is meant to exist without being searchable. That constraint
+is why the site is built this way, and `npm run check` is what enforces it.
 
 ```bash
 npm install
@@ -37,7 +37,7 @@ The file has three parts:
   at the top, `context` (the short facts beside the role — two or three words
   each, they share a line), `available`, `contact`, `place`.
 - **`blocks`** — the body, in the order it appears:
-  - `practice` → **About**, a `prose` array of paragraphs.
+  - `practice` → **Welcome**, a `prose` array of paragraphs.
   - `writing` → **Writing**, a `pieces` array of `{ type, title, description,
     url }`. Give a piece its `url` and its slot becomes a `Read` button;
     leave it empty and the slot stays outlined.
