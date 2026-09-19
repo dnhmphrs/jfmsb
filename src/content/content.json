@@ -9,7 +9,7 @@
       "zh": "阅读"
     },
     "awaiting": {
-      "en": "Awaiting url",
+      "en": "Available on request",
       "zh": "链接待补"
     }
   },
@@ -23,8 +23,8 @@
       "zh": "人工智能政策研究者"
     },
     "statement": {
-      "en": "Research, facilitation and strategy for the institutions, communities and companies shaping how advanced AI meets the public good.",
-      "zh": "为塑造先进人工智能如何服务公共利益的机构、社区与企业，提供研究、协调与战略支持。"
+      "en": "I work across research, facilitation and political strategy to shape how advanced AI serves the public good",
+      "zh": "我从事研究、协调与政治战略工作，推动先进人工智能服务于公共利益"
     },
     "context": [
       {
@@ -37,8 +37,8 @@
       }
     ],
     "available": {
-      "en": "Available for Research Collaboration, Policy Advisory and Speaker roles",
-      "zh": "开放合作"
+      "en": "Available for research collaborations, political advisory work and speaking engagements",
+      "zh": "开放研究合作、政治咨询与演讲邀约"
     },
     "contact": {
       "label": {
@@ -57,13 +57,17 @@
     {
       "key": "practice",
       "label": {
-        "en": "About",
+        "en": "Welcome",
         "zh": "关于"
       },
       "prose": [
         {
-          "en": "I am an AI policy researcher, bridgemaker, political organiser and strategist based in Berlin. I focus on systemic analysis and political strategy, particularly geopolitics and technology governance across China and the EU. I bridge across civil society, industry and institutions to centre the critical risks of technology at the forefront of political design. With industry experience in machine learning, and as a visiting researcher to the United Nations Nuclear Non-Proliferation Treaty Conference, I specialise in multilateral and systemic framing of technology and its impacts.",
-          "zh": "我是一位常驻柏林的人工智能政策研究者、桥梁搭建者、政治组织者与战略家。聚焦于系统性分析与政治战略，尤其关注地缘政治与技术治理（中国与欧盟）。跨越公民社会、产业与机构，致力于将技术的关键风险置于政治设计的核心。凭借在机器学习领域的产业经验，以及作为联合国核不扩散条约大会访问研究员的经历，专长于以多边与系统性的视角审视技术及其影响。"
+          "en": "I am an AI policy researcher and political strategist based in Berlin. I focus on technologies with disruptive social impacts and on building the alliances, resources and institutional capacity needed to govern them. My work centres on systemic analysis, focusing on the geopolitics of AI across China, the United States and the European Union.",
+          "zh": "我是一名常驻柏林的人工智能政策研究者与政治战略顾问，关注具有颠覆性社会影响的技术，并致力于构建治理这些技术所需的联盟、资源与机构能力。我的工作以系统性分析为核心，包括人工智能在中国、美国和欧盟之间的地缘政治维度。"
+        },
+        {
+          "en": "Embedded in civil society and labour movements, I ground my advisory work in the experience of global networks responding to the challenges posed by AI and Big Tech. Drawing on industry experience in machine learning and work as an AI policy fellow focused on technology diplomacy, I bring a multilateral, systemic lens to how technological risks and impacts unfold.",
+          "zh": "扎根于公民社会与劳工运动，我通过应对人工智能与大型科技公司挑战的全球网络，让咨询工作建立在一线现实之上。凭借机器学习行业经验，以及专注于技术外交的人工智能政策研究经历，我以多边和系统性视角审视技术风险与影响如何在现实中展开。"
         }
       ]
     },
@@ -80,16 +84,16 @@
             "zh": "工作论文"
           },
           "title": {
-            "en": "Ontological Insecurity: Sovereignty, Nationalism and how the EU navigates the China-US Competition for Market Dominance of Artificial Intelligence",
+            "en": "Ontological Insecurity: Sovereignty, Nationalism and How the EU Navigates China-US Competition for AI Market Dominance",
             "zh": "本体性不安全：主权、民族主义，以及欧盟如何在中美争夺人工智能市场主导权的竞争中寻路"
           },
           "description": {
-            "en": "This Working Paper provides an analysis of how the emergence of soverignty narrative around technological infrastructure and AI is a symptom of geopolitical insecurity as market forces are concentrated in the China-US bind. Consequently, as nationalism and defense heightens across European countries, the soverignty arguement leverages this approach as it races to find security. From this lens, taking on theories and frameworks from social movement strategies, the paper provides pointers for how institutions and movements can prepare capabilties and infrastructure for protecting public interest.",
-            "zh": "主权叙事与中美竞争格局"
+            "en": "This working paper analyses how emerging sovereignty narratives around technological infrastructure and AI reflect geopolitical insecurity as market power concentrates within China-US competition. As nationalism and defence concerns intensify across Europe, sovereignty becomes a strategy for regaining security. Drawing on theories and frameworks grounded in social movements across the Global South, the paper offers guidance on how institutions and movements can build the capabilities and infrastructure needed to protect the public interest.",
+            "zh": "本工作论文分析了围绕技术基础设施和人工智能兴起的主权叙事，如何反映市场力量集中于中美竞争格局所引发的地缘政治不安全感。随着民族主义和国防关切在欧洲加剧，主权成为重获安全感的一种战略。论文借鉴植根于全球南方社会运动的理论与框架，为机构和社会运动如何建设保护公共利益所需的能力与基础设施提供建议。"
           },
           "url": "",
           "placeholder": true,
-          "note": "Two facts still missing: the url, and her Chinese description. The English is her own text, verbatim, including her spellings (soverignty, arguement, capabilties) - do not correct them. The Chinese standing in is the short line this piece already carried in the CV; replace it with her own abstract when she writes one. A blank url draws the outlined slot rather than nothing. A piece of writing carries no year: the CV dates posts because a post is a span, and a paper is not."
+          "note": "The url is still missing. A blank url draws the outlined slot rather than nothing. A piece of writing carries no year: the CV dates posts because a post is a span, and a paper is not."
         },
         {
           "type": {
@@ -97,16 +101,16 @@
             "zh": "简报"
           },
           "title": {
-            "en": "Artificial Intelligence in Nuclear Regulation Frameworks: Trends in Security Narratives and Regulatory Change",
+            "en": "Artificial Intelligence in Nuclear Regulatory Frameworks: Trends in Security Narratives and Regulatory Change",
             "zh": "核监管框架中的人工智能：安全叙事与监管变革的趋势"
           },
           "description": {
-            "en": "This article provides a snapshot on how Artificial Intelligence emerges as a dominante topic in traditional international security environments and outlines the impact of these topics and how it is interacting with a rapidly changing regulartory environment.",
-            "zh": "人工智能作为国际安全的新兴议题"
+            "en": "This briefing examines how artificial intelligence has become a prominent issue in traditional international security domains such as arms control. It maps the actors, incentives and trends driving this shift and considers what they mean for security policy in a rapidly changing regulatory environment.",
+            "zh": "本简报考察人工智能如何成为军备控制等传统国际安全领域的重要议题，梳理推动这一转变的参与者、动机与趋势，并探讨这些趋势在快速变化的监管环境中对安全政策的意义。"
           },
           "url": "",
           "placeholder": true,
-          "note": "Two facts still missing: the url, and her Chinese description. The English is her own text, verbatim, including her spellings (dominante, regulartory) - do not correct them. The Chinese standing in is the short line this piece already carried in the CV. A blank url draws the outlined slot rather than nothing. A piece of writing carries no year: the CV dates posts because a post is a span, and a paper is not."
+          "note": "The url is still missing. A blank url draws the outlined slot rather than nothing. A piece of writing carries no year: the CV dates posts because a post is a span, and a paper is not."
         }
       ]
     },
@@ -124,25 +128,47 @@
           },
           "entries": [
             {
-              "year": "2025–",
+              "year": "2025",
               "title": {
                 "en": "Fellow",
                 "zh": "研究员"
               },
               "org": {
-                "en": "AIxist – geopolitics, labour and national security",
-                "zh": "AIxist – 地缘政治、劳动与国家安全"
+                "en": "AIxist – Geopolitical security, sovereignty and autonomous weapons",
+                "zh": "AIxist – 地缘政治安全、主权与自主武器"
               }
             },
             {
-              "year": "2024–",
+              "year": "2025",
               "title": {
-                "en": "Labour movements and public-interest technology",
-                "zh": "劳工运动与公共利益技术"
+                "en": "Organisational Advisor",
+                "zh": "组织顾问"
               },
               "org": {
-                "en": "Research and facilitation",
-                "zh": "研究与协调"
+                "en": "Technology labour movements and public-interest technology · Research and facilitation",
+                "zh": "技术劳工运动与公共利益技术 · 研究与协调"
+              }
+            },
+            {
+              "year": "2026",
+              "title": {
+                "en": "Strategic Advisor",
+                "zh": "战略顾问"
+              },
+              "org": {
+                "en": "Multiple Berlin political parties ahead of the 2026 state election · Research and facilitation",
+                "zh": "2026 年州选举前为柏林多个地方政党提供研究与协调"
+              }
+            },
+            {
+              "year": "2026",
+              "title": {
+                "en": "Strategic Advisor and Facilitator",
+                "zh": "战略顾问与协调者"
+              },
+              "org": {
+                "en": "Pan-European civil society convening on AI, the technology industry and democratic societies",
+                "zh": "泛欧洲公民社会人工智能、科技产业与民主社会会议"
               }
             }
           ]
@@ -154,26 +180,54 @@
           },
           "entries": [
             {
-              "year": "2023–",
+              "year": "2026",
               "title": {
-                "en": "Workshops and convenings",
-                "zh": "工作坊与召集"
+                "en": "Nuclear Security Systems and AI Technologies",
+                "zh": "核安全系统与人工智能技术"
               },
               "org": {
-                "en": "Civil society, industry, institutions",
-                "zh": "公民社会、产业与机构"
+                "en": "Bits & Bäume",
+                "zh": "Bits & Bäume"
               }
             },
             {
-              "year": "2023–",
+              "year": "2026",
               "title": {
-                "en": "Political organising",
-                "zh": "政治组织工作"
+                "en": "Shaping Financial Realities: Money Strategies in Movement Spaces",
+                "zh": "塑造财务现实：运动空间中的资金策略"
+              },
+              "org": {
+                "en": "Workshop series",
+                "zh": "工作坊系列"
+              },
+              "placeholder": true,
+              "note": "Add the year(s) this series ran."
+            },
+            {
+              "year": "2025",
+              "title": {
+                "en": "Founding Conference on Big Tech & Society",
+                "zh": "大科技与社会创始会议"
               },
               "org": {
                 "en": "Berlin",
                 "zh": "柏林"
-              }
+              },
+              "placeholder": true,
+              "note": "Add the year this conference was founded/held."
+            },
+            {
+              "year": "2025",
+              "title": {
+                "en": "Organisational Advisor, International Operations",
+                "zh": "国际运营组织顾问"
+              },
+              "org": {
+                "en": "Tech Workers Coalition",
+                "zh": "科技工人联盟"
+              },
+              "placeholder": true,
+              "note": "Add the year(s) this role covered."
             }
           ]
         },
@@ -184,27 +238,47 @@
           },
           "entries": [
             {
-              "year": "",
+              "year": "2026",
               "title": {
-                "en": "Visiting researcher",
-                "zh": "访问研究员"
+                "en": "Organisational Consultant",
+                "zh": "组织顾问"
+              },
+              "org": {
+                "en": "Political and civil society advisory",
+                "zh": "政治与公民社会咨询"
+              }
+            },
+            {
+              "year": "2023–",
+              "title": {
+                "en": "Visiting AI Researcher",
+                "zh": "访问人工智能研究员"
               },
               "org": {
                 "en": "UN Nuclear Non-Proliferation Treaty Conference",
                 "zh": "联合国核不扩散条约大会"
-              },
-              "placeholder": true,
-              "note": "Add the year of the NPT Conference attended. Blank, it draws the hollow square."
+              }
             },
             {
               "year": "2020–22",
               "title": {
-                "en": "Machine learning",
-                "zh": "机器学习"
+                "en": "Machine Learning Solutions for Large European Enterprises",
+                "zh": "面向欧洲大型企业的机器学习解决方案"
               },
               "org": {
-                "en": "Industry",
-                "zh": "产业界"
+                "en": "Industry & Growth",
+                "zh": "产业与增长"
+              }
+            },
+            {
+              "year": "2021",
+              "title": {
+                "en": "Technology Diplomacy Researcher",
+                "zh": "技术外交政策研究员"
+              },
+              "org": {
+                "en": "Asia Society Australia",
+                "zh": "亚洲协会澳大利亚分会"
               }
             }
           ]

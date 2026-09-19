@@ -203,16 +203,11 @@ const ok=(n,v,extra='')=>{results.push(`${v?'PASS':'FAIL'}  ${n}${extra?'  '+ext
   ok('the switch is finished on that frame',
     settled.quads===d.quads && settled.height===d.height, JSON.stringify({d, settled}));
   ok('<html lang> follows', (await p.evaluate(()=>document.documentElement.lang))==='zh-Hans');
-  /* The tab carries a mark, not a name: block glyphs and nothing a reader of
-     any language could pronounce. Length is the author's business - it is a
-     literal string in rollup.config.mjs - so what is asserted is that it is
-     non-empty and that every character is a Block Element or a Geometric
-     Shape. It must also not change with the toggle: it is the document's
-     mark, not the page's current language. */
+  /* The generic title is the sole readable exception to the output rule. It
+     must not change with the language toggle or acquire identifying content. */
   {
     const t = await p.title();
-    ok('the tab is a block mark in either language',
-      t.length > 0 && t.length <= 64 && /^[\u2580-\u25FF]+$/.test(t), JSON.stringify(t));
+    ok('the tab has the generic title in either language', t === 'Welcome', JSON.stringify(t));
   }
 
   /* Nothing may exceed the measure except Chinese punctuation, which hangs
@@ -402,17 +397,16 @@ const ok=(n,v,extra='')=>{results.push(`${v?'PASS':'FAIL'}  ${n}${extra?'  '+ext
   /* The bundle is the one that regressed silently: @rollup/plugin-json used to
      inline content.json verbatim, so dist/js/main.js opened with her name. */
   ok('the bundle carries no content literals', leaks(js, 'bundle').length === 0, leaks(js, 'bundle').join(' '));
-  /* The title is the one head element that survived, and it survived only
-     because it is not made of words: it must be block glyphs end to end, with
-     no Latin, no Han and no punctuation an index could tokenise. Asserted on
-     both documents, because a wrong URL is the same document. */
+  /* The title is the sole readable exception. Assert its exact generic value
+     on both documents so identifying content cannot drift into it. */
   {
     for (const [src, where] of [[html, 'index'], [notfound, '404']]) {
       const t = (src.match(/<title>([^<]*)<\/title>/) || ['', ''])[1];
-      ok(`the ${where} title is glyphs only, no language`,
-        t.length > 0 && t.length <= 64 && /^[\u2580-\u25FF]+$/.test(t), JSON.stringify(t));
+      ok(`the ${where} title is generic`, t === 'Welcome', JSON.stringify(t));
     }
   }
+  ok('the circular favicon is declared and served',
+    /rel="icon" href="\/circle\.svg"/.test(html) && fs.existsSync(path.join(ROOT, 'circle.svg')));
   ok('robots noindex is in the served head', /name="robots"[^>]*noindex/.test(html));
 
   /* The share card is an image and nothing else. og:title and og:description

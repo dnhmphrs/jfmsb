@@ -3,21 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <!-- No description, author, Open Graph or Twitter tags, and a title that is
-       not made of words.
+  <!-- No description, author, Open Graph or Twitter text. The generic title
+       "Welcome" is the sole readable exception.
 
        Every string this site shows is drawn into a canvas by the GPU, and the
-       point of that is defeated by one <title>: a search index reads the head
-       before it reads anything else, and the head was the only place her name
-       still appeared as text. So the title carries no language at all - it is
-       a block-glyph rendering of a hash of the content, written in by the
-       build (see titleMark in rollup.config.mjs), and the tag is left empty
-       here so the source shows what the page itself contributes: nothing.
-
-       The empty title it replaced was correct and characterless: Chrome falls
-       back to the hostname, and the tab read like a parked domain. A mark with
-       no lexical content costs an index nothing and gives the tab an identity,
-       which is the whole of the trade.
+       point would be defeated by putting her name, role or biography in the
+     title. "Welcome" makes the tab recognisable without exposing any personal
+       content. The build inserts it into the empty source tag, and check.mjs
+       asserts that exact value.
 
        robots is the load-bearing half of it. Not transmitting a string is the
        only mechanism that is ENFORCED rather than requested; noindex is a
@@ -63,7 +56,7 @@
        scripting is on, and put back by main.js if WebGL turns out not to be. -->
   <script>document.documentElement.classList.remove('no-js')</script>
 
-  <link rel="icon" href="/favicon.ico" sizes="any" />
+     <link rel="icon" href="/circle.svg" type="image/svg+xml" />
 
   <!-- Self-hosted, subset webfonts. No third-party request: see
        scripts/fetch-fonts.mjs. Preloaded because the WebGL text atlas cannot be
